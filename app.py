@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from read_serial import get_temperature
 
 app = Flask(__name__)
 
