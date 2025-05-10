@@ -1,24 +1,33 @@
 from flask import Flask, request, jsonify
+from read_serial import get_temperature
 
 app = Flask(__name__)
-latest_command = {"command": None}
 
-@app.route("/alexa-command", methods=["POST"])
-def alexa_command():
-    data = request.get_json()
-    if "command" in data:
-        latest_command["command"] = data["command"]
-        return jsonify({"status": "Command received"}), 200
-    return jsonify({"error": "Invalid format"}), 400
+@app.route('/')
+def home():
+    return "Cottage temperature API is running."
 
-@app.route("/get-command", methods=["GET"])
-def get_command():
-    return jsonify(latest_command)
+@app.route('/alexa', methods=['POST'])
+def alexa_handler():
+    req = request.get_json()
+    intent = req["request"]["intent"]["name"]
 
-@app.route("/clear-command", methods=["POST"])
-def clear_command():
-    latest_command["command"] = None
-    return jsonify({"status": "Command cleared"}), 200
- 
-if __name__ == "_main_":
-    app.run()
+    if intent == "CottageTemperatureIntent":
+        temp = get_temperature()
+        if temp is None:
+            speech = "Sorry, I couldn't read the temperature."
+        else:
+            speech = f"The temperature in the cottage is {temp:.1f} degrees Celsius."
+        
+        return jsonify({
+            "version": "1.0",
+            "response": {
+                "shouldEndSession": True,
+                "outputSpeech": {
+                    "type": "PlainText",
+                    "text": speech
+                }
+            }
+        })
+    
+    return jsonify({})
