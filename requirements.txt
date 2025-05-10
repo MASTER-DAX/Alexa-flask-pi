@@ -1,5 +1,2 @@
-flask
-requests
-ask-sdk-core
-ask-sdk-webservice-support
-gunicorn
+Flask==2.2.2
+pyserial
