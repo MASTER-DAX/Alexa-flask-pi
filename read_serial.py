@@ -1,7 +1,7 @@
 # read_serial.py
 import serial
 
-SERIAL_PORT = "/dev/ttyUSB0"  # Adjust based on your hardware (e.g., /dev/ttyS0 or /dev/ttyACM0)
+SERIAL_PORT = "COM4"  # Adjust based on your hardware (e.g., /dev/ttyS0 or /dev/ttyACM0)
 BAUD_RATE = 9600
 
 def get_temperature():
