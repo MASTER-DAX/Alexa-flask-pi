@@ -1,50 +1,52 @@
-from flask import Flask, request, jsonify  # ✅ Required Flask imports
-from read_serial import get_temperature    # ✅ Your function that reads Arduino serial
+from flask import Flask, request, jsonify
 
-app = Flask(__name__)  # ✅ Create Flask app
+app = Flask(__name__)
 
-@app.route('/')
-def home():
-    return "Cottage temperature API is running."
+# Dummy temperature reading function
+def get_temperature():
+    try:
+        # Replace this with real sensor reading logic (e.g., from DHT22)
+        return 22.5  # Example static temperature
+    except Exception as e:
+        print("Error getting temperature:", e)
+        return None
 
 @app.route('/alexa', methods=['POST'])
 def alexa_handler():
     try:
         req = request.get_json()
-        print("Incoming Alexa request:", req)  # Optional: helpful for debugging
+        print("Incoming Alexa request:", req)
 
-        intent = req["request"]["intent"]["name"]
+        # Check the type of request
+        if req["request"]["type"] == "IntentRequest":
+            intent = req["request"]["intent"]["name"]
 
-        if intent == "CottageTemperatureIntent":
-            temp = get_temperature()
+            if intent == "CottageTemperatureIntent":
+                temp = get_temperature()
 
-            if temp is None:
-                speech = "Sorry, I couldn't read the temperature."
+                if temp is None:
+                    speech = "Sorry, I couldn't read the temperature."
+                else:
+                    speech = f"The temperature in the cottage is {temp:.1f} degrees Celsius."
             else:
-                speech = f"The temperature in the cottage is {temp:.1f} degrees Celsius."
+                speech = "Sorry, I don't understand that request."
 
-            return jsonify({
-                "version": "1.0",
-                "response": {
-                    "shouldEndSession": True,
-                    "outputSpeech": {
-                        "type": "PlainText",
-                        "text": speech
-                    }
-                }
-            })
+        elif req["request"]["type"] == "LaunchRequest":
+            speech = "Welcome to the Cottage Monitor. You can ask for the temperature."
 
         else:
-            return jsonify({
-                "version": "1.0",
-                "response": {
-                    "shouldEndSession": True,
-                    "outputSpeech": {
-                        "type": "PlainText",
-                        "text": "Sorry, I don't understand that request."
-                    }
+            speech = "Thank you. Goodbye!"
+
+        return jsonify({
+            "version": "1.0",
+            "response": {
+                "shouldEndSession": True,
+                "outputSpeech": {
+                    "type": "PlainText",
+                    "text": speech
                 }
-            })
+            }
+        })
 
     except Exception as e:
         print("Error:", e)
@@ -59,6 +61,5 @@ def alexa_handler():
             }
         })
 
-# ✅ Start the Flask app if this file is run directly
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
