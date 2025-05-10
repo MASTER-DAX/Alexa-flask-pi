@@ -1,7 +1,7 @@
 services:
   - type: web
-    name: flask-alexa-server
+    name: cottage-temp-api
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python app.py"
