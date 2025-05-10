@@ -2,14 +2,10 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Dummy temperature reading function
+# Simulated temperature sensor function
 def get_temperature():
-    try:
-        # Replace this with real sensor reading logic (e.g., from DHT22)
-        return 22.5  # Example static temperature
-    except Exception as e:
-        print("Error getting temperature:", e)
-        return None
+    # Replace this with actual sensor reading from Raspberry Pi
+    return 21.7
 
 @app.route('/alexa', methods=['POST'])
 def alexa_handler():
@@ -17,25 +13,26 @@ def alexa_handler():
         req = request.get_json()
         print("Incoming Alexa request:", req)
 
-        # Check the type of request
-        if req["request"]["type"] == "IntentRequest":
-            intent = req["request"]["intent"]["name"]
+        # LaunchRequest — when user says "open Cottage Monitor"
+        if req["request"]["type"] == "LaunchRequest":
+            speech = "Welcome to the Cottage Monitor. You can ask for the temperature."
 
-            if intent == "CottageTemperatureIntent":
+        # IntentRequest — when user says something like "what's the temperature"
+        elif req["request"]["type"] == "IntentRequest":
+            intent_name = req["request"]["intent"]["name"]
+
+            if intent_name == "CottageTemperatureIntent":
                 temp = get_temperature()
-
-                if temp is None:
-                    speech = "Sorry, I couldn't read the temperature."
-                else:
+                if temp is not None:
                     speech = f"The temperature in the cottage is {temp:.1f} degrees Celsius."
+                else:
+                    speech = "Sorry, I couldn't read the temperature."
             else:
                 speech = "Sorry, I don't understand that request."
 
-        elif req["request"]["type"] == "LaunchRequest":
-            speech = "Welcome to the Cottage Monitor. You can ask for the temperature."
-
+        # Catch-all for other request types
         else:
-            speech = "Thank you. Goodbye!"
+            speech = "Sorry, I couldn't process that request."
 
         return jsonify({
             "version": "1.0",
@@ -62,4 +59,4 @@ def alexa_handler():
         })
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(host='0.0.0.0', port=5000)
