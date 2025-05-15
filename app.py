@@ -15,7 +15,7 @@ def esp_post():
     data = request.get_json()
     message = data.get("message", "")
 
-    # Simple parser (optional: enhance this)
+    # Simple parser
     if "Temperature" in message:
         parts = message.split(",")
         for part in parts:
@@ -34,39 +34,73 @@ def esp_post():
 
 @app.route("/command", methods=["GET"])
 def get_command():
-    # Implement if needed: return a command string to ESP
+    # Optional: return any command to be received by ESP
     return "", 200
 
 @app.route("/alexa", methods=["POST"])
 def alexa_skill():
     req = request.get_json()
-    intent_name = req["request"]["intent"]["name"]
 
-    if intent_name == "CottageTemperatureIntent":
-        temp = latest_data["temperature"]
-        if temp:
-            response_text = f"The current temperature is {temp} degrees Celsius."
-        else:
-            response_text = "Sorry, I couldn't get the temperature right now."
+    try:
+        req_type = req["request"]["type"]
 
+        if req_type == "LaunchRequest":
+            return jsonify({
+                "version": "1.0",
+                "response": {
+                    "shouldEndSession": False,
+                    "outputSpeech": {
+                        "type": "PlainText",
+                        "text": "Welcome to Cottage Monitor. You can ask for the temperature."
+                    }
+                }
+            })
+
+        elif req_type == "IntentRequest":
+            intent_name = req["request"]["intent"]["name"]
+
+            if intent_name == "CottageTemperatureIntent":
+                temp = latest_data["temperature"]
+                if temp:
+                    response_text = f"The current temperature is {temp} degrees Celsius."
+                else:
+                    response_text = "Sorry, I couldn't get the temperature right now."
+
+                return jsonify({
+                    "version": "1.0",
+                    "response": {
+                        "shouldEndSession": True,
+                        "outputSpeech": {
+                            "type": "PlainText",
+                            "text": response_text
+                        }
+                    }
+                })
+
+        # Fallback for unknown intents
         return jsonify({
             "version": "1.0",
             "response": {
                 "shouldEndSession": True,
                 "outputSpeech": {
                     "type": "PlainText",
-                    "text": response_text
+                    "text": "Sorry, I didn't understand that request."
                 }
             }
         })
 
-    return jsonify({
-        "version": "1.0",
-        "response": {
-            "shouldEndSession": True,
-            "outputSpeech": {
-                "type": "PlainText",
-                "text": "Sorry, I didn't understand that."
+    except Exception as e:
+        print(f"Error handling Alexa request: {e}")
+        return jsonify({
+            "version": "1.0",
+            "response": {
+                "shouldEndSession": True,
+                "outputSpeech": {
+                    "type": "PlainText",
+                    "text": "Something went wrong on the server."
+                }
             }
-        }
-    })
+        })
+
+if __name__ == "__main__":
+    app.run(debug=True)
