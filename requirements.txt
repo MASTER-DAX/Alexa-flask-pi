@@ -1,3 +1,2 @@
-Flask
-pyserial
+flask
 gunicorn
