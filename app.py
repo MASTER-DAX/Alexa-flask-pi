@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
@@ -7,7 +8,8 @@ latest_data = {
     "temperature": None,
     "gas": None,
     "fan": "OFF",
-    "purifier": "OFF"
+    "purifier": "OFF",
+    "last_updated": None
 }
 
 @app.route("/esp", methods=["POST"])
@@ -15,7 +17,6 @@ def esp_post():
     data = request.get_json()
     message = data.get("message", "")
 
-    # Simple parser
     if "Temperature" in message:
         parts = message.split(",")
         for part in parts:
@@ -23,6 +24,9 @@ def esp_post():
                 latest_data["temperature"] = part.split(":")[1].strip().replace("C", "")
             if "Gas Level" in part:
                 latest_data["gas"] = part.split(":")[1].strip()
+
+        latest_data["last_updated"] = datetime.utcnow()
+    
     elif "FAN:" in message:
         latest_data["fan"] = "ON" if "ON" in message else "OFF"
     elif "GAS:HIGH" in message:
@@ -34,7 +38,6 @@ def esp_post():
 
 @app.route("/command", methods=["GET"])
 def get_command():
-    # Optional: return any command to be received by ESP
     return "", 200
 
 @app.route("/alexa", methods=["POST"])
@@ -61,10 +64,13 @@ def alexa_skill():
 
             if intent_name == "CottageTemperatureIntent":
                 temp = latest_data["temperature"]
-                if temp:
+                last_updated = latest_data["last_updated"]
+
+                # Check if data is recent (within last 30 seconds)
+                if temp and last_updated and datetime.utcnow() - last_updated < timedelta(seconds=30):
                     response_text = f"The current temperature is {temp} degrees Celsius."
                 else:
-                    response_text = "Sorry, I couldn't get the temperature right now."
+                    response_text = "Sorry, I couldn't get the current temperature. Please try again shortly."
 
                 return jsonify({
                     "version": "1.0",
@@ -77,7 +83,6 @@ def alexa_skill():
                     }
                 })
 
-        # Fallback for unknown intents
         return jsonify({
             "version": "1.0",
             "response": {
