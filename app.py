@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
-# Store the latest state
+# Store the latest sensor and device state
 latest_data = {
     "temperature": None,
     "gas": None,
@@ -12,6 +12,9 @@ latest_data = {
     "purifier": "OFF",
     "last_updated": None
 }
+
+# Store the latest command from Alexa
+latest_command = None
 
 @app.route("/esp", methods=["POST"])
 def esp_post():
@@ -35,6 +38,18 @@ def esp_post():
         latest_data["purifier"] = "ON" if "ON" in message else "OFF"
 
     return jsonify({"status": "ok"})
+
+
+@app.route("/command", methods=["GET"])
+def get_command():
+    global latest_command
+    if latest_command:
+        cmd = latest_command
+        latest_command = None  # Clear after reading
+        print(f"[Command sent to ESP32]: {cmd}")
+        return cmd
+    else:
+        return "", 204  # No content
 
 
 @app.route("/alexa", methods=["POST"])
@@ -73,22 +88,27 @@ def alexa_skill():
                 send_command("FAN:ON")
                 latest_data["fan"] = "ON"
                 return simple_response("Fan has been turned on.")
+
             elif intent == "TurnOffFanIntent":
                 send_command("FAN:OFF")
                 latest_data["fan"] = "OFF"
                 return simple_response("Fan has been turned off.")
+
             elif intent == "TurnOnLightsIntent":
                 send_command("LIGHTS:ON")
                 latest_data["lights"] = "ON"
                 return simple_response("Lights have been turned on.")
+
             elif intent == "TurnOffLightsIntent":
                 send_command("LIGHTS:OFF")
                 latest_data["lights"] = "OFF"
                 return simple_response("Lights have been turned off.")
+
             elif intent == "TurnOnPurifierIntent":
                 send_command("PURIFIER:ON")
                 latest_data["purifier"] = "ON"
                 return simple_response("Purifier has been turned on.")
+
             elif intent == "TurnOffPurifierIntent":
                 send_command("PURIFIER:OFF")
                 latest_data["purifier"] = "OFF"
@@ -102,10 +122,9 @@ def alexa_skill():
 
 
 def send_command(cmd):
-    # You can log this or forward to your ESP using another HTTP request or a queue.
-    print(f"[Command to ESP] {cmd}")
-    # Example if using requests to forward:
-    # requests.post("http://esp_ip_address/command", json={"command": cmd})
+    global latest_command
+    latest_command = cmd
+    print(f"[Command stored for ESP32]: {cmd}")
 
 
 def simple_response(text):
