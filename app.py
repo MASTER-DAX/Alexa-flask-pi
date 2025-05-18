@@ -40,7 +40,7 @@ def esp_post():
 def get_command():
     return "", 200
 
-@app.route("/alexa", methods=["POST"])
+@app.route("/smarthome", methods=["POST"])
 def alexa_skill():
     req = request.get_json()
 
