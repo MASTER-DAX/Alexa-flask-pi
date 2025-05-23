@@ -1,3 +1,13 @@
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+last_command = ""
+
+@app.route("/device", methods=["GET"])
+def get_command():
+    global last_command
+    return last_command
+
 @app.route("/alexa", methods=["POST"])
 def handle_alexa():
     global last_command
@@ -17,7 +27,7 @@ def handle_alexa():
                 "shouldEndSession": False
             }
         })
-    
+
     elif request_type == "IntentRequest":
         try:
             intent = data['request']['intent']['name']
@@ -69,7 +79,7 @@ def handle_alexa():
             })
 
     elif request_type == "SessionEndedRequest":
-        # Optionally handle session end
+        # Optionally handle session end here
         return jsonify({})
 
     else:
@@ -83,3 +93,6 @@ def handle_alexa():
                 "shouldEndSession": True
             }
         })
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
