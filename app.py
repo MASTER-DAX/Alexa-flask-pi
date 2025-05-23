@@ -1,20 +1,37 @@
 from flask import Flask, request, jsonify
+import logging
 
 app = Flask(__name__)
 last_command = ""
+
+logging.basicConfig(level=logging.INFO)
 
 @app.route("/device", methods=["GET"])
 def get_command():
     global last_command
     cmd = last_command
-    last_command = ""  # Clear the command after sending it
+    last_command = ""  # Clear after sending
     return cmd, 200, {'Content-Type': 'text/plain'}
 
 @app.route("/alexa", methods=["POST"])
 def handle_alexa():
     global last_command
     data = request.get_json()
-    intent = data['request']['intent']['name']
+    app.logger.info(f"Alexa request data: {data}")
+
+    try:
+        intent = data['request']['intent']['name']
+    except (KeyError, TypeError):
+        return jsonify({
+            "version": "1.0",
+            "response": {
+                "outputSpeech": {
+                    "type": "PlainText",
+                    "text": "Sorry, I couldn't understand the command."
+                },
+                "shouldEndSession": True
+            }
+        })
 
     intent_to_command = {
         "TurnOnFanIntent": '1',
