@@ -6,14 +6,16 @@ last_command = ""
 @app.route("/device", methods=["GET"])
 def get_command():
     global last_command
-    return last_command
+    cmd = last_command
+    last_command = ""  # Clear the command after sending it
+    return cmd, 200, {'Content-Type': 'text/plain'}
 
 @app.route("/alexa", methods=["POST"])
 def handle_alexa():
     global last_command
     data = request.get_json()
     intent = data['request']['intent']['name']
-    
+
     intent_to_command = {
         "TurnOnFanIntent": '1',
         "TurnOffFanIntent": '2',
