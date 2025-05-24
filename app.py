@@ -22,7 +22,7 @@ def handle_alexa():
             "response": {
                 "outputSpeech": {
                     "type": "PlainText",
-                    "text": "Welcome to Cottage Monitor. You can ask me to turn on the fan, lights, or purifier."
+                    "text": "Welcome to Smart Cottage, You can ask me anything."
                 },
                 "shouldEndSession": False
             }
