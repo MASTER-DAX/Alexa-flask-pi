@@ -2,15 +2,26 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 last_command = ""
+current_temperature = "not available"
 
 @app.route("/device", methods=["GET"])
 def get_command():
     global last_command
     return last_command
 
+@app.route("/update_temperature", methods=["POST"])
+def update_temperature():
+    global current_temperature
+    data = request.get_json()
+    temperature = data.get("temperature")
+    if temperature:
+        current_temperature = temperature
+        return "Temperature updated", 200
+    return "Missing temperature", 400
+
 @app.route("/alexa", methods=["POST"])
 def handle_alexa():
-    global last_command
+    global last_command, current_temperature
     data = request.get_json()
     app.logger.info(f"Alexa request data: {data}")
 
@@ -22,22 +33,22 @@ def handle_alexa():
             "response": {
                 "outputSpeech": {
                     "type": "PlainText",
-                    "text": "Welcome to Smart Cottage, You can ask me anything."
+                    "text": "Welcome to Smart Cottage. You can ask me to control devices or check the temperature."
                 },
                 "shouldEndSession": False
             }
         })
 
     elif request_type == "IntentRequest":
-        try:
-            intent = data['request']['intent']['name']
-        except (KeyError, TypeError):
+        intent = data['request']['intent']['name']
+
+        if intent == "CottageTemperatureIntent":
             return jsonify({
                 "version": "1.0",
                 "response": {
                     "outputSpeech": {
                         "type": "PlainText",
-                        "text": "Sorry, I couldn't understand the command."
+                        "text": f"The current temperature in the cottage is {current_temperature} degrees."
                     },
                     "shouldEndSession": True
                 }
@@ -61,7 +72,7 @@ def handle_alexa():
                 "response": {
                     "outputSpeech": {
                         "type": "PlainText",
-                        "text": f"{intent.replace('Intent', '').replace('Turn', '').replace('On', 'On ').replace('Off', 'Off ')} command sent"
+                        "text": "Command granted"
                     },
                     "shouldEndSession": True
                 }
@@ -72,14 +83,13 @@ def handle_alexa():
                 "response": {
                     "outputSpeech": {
                         "type": "PlainText",
-                        "text": "Unknown command"
+                        "text": "Unknown command."
                     },
                     "shouldEndSession": True
                 }
             })
 
     elif request_type == "SessionEndedRequest":
-        # Optionally handle session end here
         return jsonify({})
 
     else:
