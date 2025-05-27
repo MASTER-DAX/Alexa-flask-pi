@@ -33,7 +33,7 @@ def handle_alexa():
             "response": {
                 "outputSpeech": {
                     "type": "PlainText",
-                    "text": "Okay, masusunod po ang iyong kahilingan master Dax"
+                    "text": "Smart Cottage has activated, You can ask me anything"
                 },
                 "shouldEndSession": False
             }
