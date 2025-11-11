@@ -104,5 +104,12 @@ def handle_alexa():
             }
         })
 
+@app.route("/reset_command", methods=["POST"])
+def reset_command():
+    global last_command
+    last_command = "0"  # default = no command
+    return "Command reset", 200
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
