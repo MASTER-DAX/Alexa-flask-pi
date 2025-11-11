@@ -33,70 +33,69 @@ def handle_alexa():
             "response": {
                 "outputSpeech": {
                     "type": "PlainText",
-                    "text": "Smart Cottage has activated, You can ask me anything"
+                    "text": "Smart Cottage has activated, you can ask me anything."
                 },
                 "shouldEndSession": False
             }
         })
 
-   elif request_type == "IntentRequest":
-    intent = data['request']['intent']['name']
+    elif request_type == "IntentRequest":
+        intent = data['request']['intent']['name']
 
-    if intent == "CottageTemperatureIntent":
-        return jsonify({
-            "version": "1.0",
-            "response": {
-                "outputSpeech": {
-                    "type": "PlainText",
-                    "text": f"The current temperature in the cottage is {current_temperature} degrees."
-                },
-                "shouldEndSession": True
-            }
-        })
+        if intent == "CottageTemperatureIntent":
+            return jsonify({
+                "version": "1.0",
+                "response": {
+                    "outputSpeech": {
+                        "type": "PlainText",
+                        "text": f"The current temperature in the cottage is {current_temperature} degrees."
+                    },
+                    "shouldEndSession": True
+                }
+            })
 
-    intent_to_command = {
-        "FrontLightOnIntent": '1',
-        "FrontLightOffIntent": '2',
-        "BedLightOnIntent": '3',
-        "BedLightOffIntent": '4',
-        "FrontFanOnIntent": '5',
-        "FrontFanOffIntent": '6',
-        "BedFanOnIntent": '7',
-        "BedFanOffIntent": '8',
-        "PurifierOnIntent": '9',
-        "PurifierOffIntent": 'A',
-        "PrivacyLightsOnIntent": 'B',
-        "PrivacyLightsOffIntent": 'C',
-        "FrontDoorUnlockIntent": 'D',
-        "FrontDoorLockIntent": 'E',
-        "BedDoorUnlockIntent": 'F',
-        "BedDoorLockIntent": 'G'
-    }
+        intent_to_command = {
+            "FrontLightOnIntent": '1',
+            "FrontLightOffIntent": '2',
+            "BedLightOnIntent": '3',
+            "BedLightOffIntent": '4',
+            "FrontFanOnIntent": '5',
+            "FrontFanOffIntent": '6',
+            "BedFanOnIntent": '7',
+            "BedFanOffIntent": '8',
+            "PurifierOnIntent": '9',
+            "PurifierOffIntent": 'A',
+            "PrivacyLightsOnIntent": 'B',
+            "PrivacyLightsOffIntent": 'C',
+            "FrontDoorUnlockIntent": 'D',
+            "FrontDoorLockIntent": 'E',
+            "BedDoorUnlockIntent": 'F',
+            "BedDoorLockIntent": 'G'
+        }
 
-    if intent in intent_to_command:
-        last_command = intent_to_command[intent]
-        return jsonify({
-            "version": "1.0",
-            "response": {
-                "outputSpeech": {
-                    "type": "PlainText",
-                    "text": "Command granted"
-                },
-                "shouldEndSession": True
-            }
-        })
-    else:
-        return jsonify({
-            "version": "1.0",
-            "response": {
-                "outputSpeech": {
-                    "type": "PlainText",
-                    "text": "Unknown command."
-                },
-                "shouldEndSession": True
-            }
-        })
-
+        if intent in intent_to_command:
+            last_command = intent_to_command[intent]
+            return jsonify({
+                "version": "1.0",
+                "response": {
+                    "outputSpeech": {
+                        "type": "PlainText",
+                        "text": "Command granted."
+                    },
+                    "shouldEndSession": True
+                }
+            })
+        else:
+            return jsonify({
+                "version": "1.0",
+                "response": {
+                    "outputSpeech": {
+                        "type": "PlainText",
+                        "text": "Unknown command."
+                    },
+                    "shouldEndSession": True
+                }
+            })
 
     elif request_type == "SessionEndedRequest":
         return jsonify({})
