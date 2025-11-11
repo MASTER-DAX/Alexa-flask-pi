@@ -54,16 +54,25 @@ def handle_alexa():
                 }
             })
 
-        intent_to_command = {
-            "TurnOnFanIntent": '1',
-            "TurnOffFanIntent": '2',
-            "TurnOnLightsIntent": '3',
-            "TurnOffLightsIntent": '4',
-            "TurnOnPurifierIntent": '5',
-            "TurnOffPurifierIntent": '6',
-            "UnlockDoorIntent": '7',
-            "LockDoorIntent": '8'
-        }
+    intent_to_command = {
+    "FrontLightOnIntent": '1',
+    "FrontLightOffIntent": '2',
+    "BedLightOnIntent": '3',
+    "BedLightOffIntent": '4',
+    "FrontFanOnIntent": '5',
+    "FrontFanOffIntent": '6',
+    "BedFanOnIntent": '7',
+    "BedFanOffIntent": '8',
+    "PurifierOnIntent": '9',
+    "PurifierOffIntent": 'A',
+    "PrivacyLightsOnIntent": 'B',
+    "PrivacyLightsOffIntent": 'C',
+    "FrontDoorUnlockIntent": 'D',
+    "FrontDoorLockIntent": 'E',
+    "BedDoorUnlockIntent": 'F',
+    "BedDoorLockIntent": 'G'
+}
+
 
         if intent in intent_to_command:
             last_command = intent_to_command[intent]
