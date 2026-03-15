@@ -27,7 +27,9 @@ def get_command():
     app.logger.info(f"Sending command to device: {cmd}")
     return cmd
 
-
+@app.route("/ping")
+def ping():
+    return "alive"
 # ======================================================
 # TEMPERATURE UPDATE FROM DEVICE
 # ======================================================
